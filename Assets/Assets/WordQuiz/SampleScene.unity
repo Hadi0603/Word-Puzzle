@@ -2910,9 +2910,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281365eb6ba4ed84193592aefb165fe8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  question:
-    questionImage: {fileID: 21300000, guid: 3ca7e9dfc107e1b45ab8252046552443, type: 3}
-    answer: Apple
+  questionData: {fileID: 11400000, guid: f778105bf938bea4abcb603798bec5ac, type: 2}
   questionImage: {fileID: 1170507036}
   answerWordArray:
   - {fileID: 7365132579975426312}
