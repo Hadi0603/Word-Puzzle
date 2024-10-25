@@ -18,11 +18,14 @@ public class QuizManger : MonoBehaviour
     private char[] charArray = new char[12];
     private int currentAnswerIndex = 0;
     private bool correctAnswer = true;
+    private List<int> selectedWordIndex;
     private void Awake()
     {
         if (instance == null) instance = this;
         else
             Destroy(gameObject);
+
+        selectedWordIndex = new List<int>();
     }
     private void Start()
     {
@@ -31,6 +34,7 @@ public class QuizManger : MonoBehaviour
     private void SetQuestion()
     {
         currentAnswerIndex = 0;
+        selectedWordIndex.Clear();
         ResetQuestion();
         questionImage.sprite = question.questionImage;
         for(int i = 0; i < question.answer.Length; i++)
@@ -50,6 +54,7 @@ public class QuizManger : MonoBehaviour
     public void SelectedOption(WordData wordData)
     {
         if (currentAnswerIndex >= question.answer.Length) return;
+        selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
         answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
         wordData.gameObject.SetActive(false);
         currentAnswerIndex++;
@@ -88,8 +93,14 @@ public class QuizManger : MonoBehaviour
     }
     public void ResetLastWord()
     {
-        currentAnswerIndex--;
-        answerWordArray[currentAnswerIndex].SetChar('_');
+        if (selectedWordIndex.Count > 0)
+        {
+            int index = selectedWordIndex[selectedWordIndex.Count - 1];
+            optionWordArray[index].gameObject.SetActive(true);
+            selectedWordIndex.RemoveAt(selectedWordIndex.Count - 1);
+            currentAnswerIndex--;
+            answerWordArray[currentAnswerIndex].SetChar('_');
+        }
     }
 }
 [System.Serializable]
