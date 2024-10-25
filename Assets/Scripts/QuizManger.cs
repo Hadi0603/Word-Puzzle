@@ -8,7 +8,7 @@ public class QuizManger : MonoBehaviour
 {
     public static QuizManger instance;
     [SerializeField]
-    private QuestionData question;
+    private QuizDataScriptable questionData;
     [SerializeField]
     private Image questionImage;
     [SerializeField]
@@ -19,6 +19,9 @@ public class QuizManger : MonoBehaviour
     private int currentAnswerIndex = 0;
     private bool correctAnswer = true;
     private List<int> selectedWordIndex;
+    private int currentQuestionIndex = 0;
+    private GameStatus gameStatus = GameStatus.Playing;
+    private string answerWord;
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -35,13 +38,14 @@ public class QuizManger : MonoBehaviour
     {
         currentAnswerIndex = 0;
         selectedWordIndex.Clear();
+        questionImage.sprite = questionData.questions[currentQuestionIndex].questionImage;
+        answerWord = questionData.questions[currentQuestionIndex].answer;
         ResetQuestion();
-        questionImage.sprite = question.questionImage;
-        for(int i = 0; i < question.answer.Length; i++)
+        for (int i = 0; i < answerWord.Length; i++)
         {
-            charArray[i] = char.ToUpper(question.answer[i]);
+            charArray[i] = char.ToUpper(answerWord[i]);
         }
-        for(int i = question.answer.Length; i < optionWordArray.Length; i++)
+        for(int i = answerWord.Length; i < optionWordArray.Length; i++)
         {
             charArray[i] = (char)UnityEngine.Random.Range(65, 91);
         }
@@ -50,20 +54,22 @@ public class QuizManger : MonoBehaviour
         {
             optionWordArray[i].SetChar(charArray[i]);
         }
+        currentQuestionIndex++;
+        gameStatus = GameStatus.Playing;
     }
     public void SelectedOption(WordData wordData)
     {
-        if (currentAnswerIndex >= question.answer.Length) return;
+        if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
         selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
         answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
         wordData.gameObject.SetActive(false);
         currentAnswerIndex++;
-        if(currentAnswerIndex >= question.answer.Length)
+        if(currentAnswerIndex >= answerWord.Length)
         {
             correctAnswer = true;
-            for(int i = 0;i < question.answer.Length; i++)
+            for(int i = 0;i < answerWord.Length; i++)
             {
-                if(char.ToUpper(question.answer[i]) != char.ToUpper(answerWordArray[i].charValue))
+                if(char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
                 {
                     correctAnswer = false;
                     break;
@@ -72,6 +78,11 @@ public class QuizManger : MonoBehaviour
             if (correctAnswer)
             {
                 Debug.Log("correct answer");
+                gameStatus = GameStatus.Next;
+                if (currentQuestionIndex < questionData.questions.Count)
+                {
+                    Invoke("SetQuestion", 0.5f);
+                }
             }
             else if (!correctAnswer)
             {
@@ -86,7 +97,7 @@ public class QuizManger : MonoBehaviour
             answerWordArray[i].gameObject.SetActive(true);
             answerWordArray[i].SetChar('_');
         }
-        for(int i = question.answer.Length; i < answerWordArray.Length; i++)
+        for(int i = answerWord.Length; i < answerWordArray.Length; i++)
         {
             answerWordArray[i].gameObject.SetActive(false);
         }  
@@ -108,4 +119,9 @@ public class QuestionData
 {
     public Sprite questionImage;
     public string answer;
+}
+public enum GameStatus
+{
+    Playing,
+    Next
 }
