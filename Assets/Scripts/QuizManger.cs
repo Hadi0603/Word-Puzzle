@@ -49,7 +49,7 @@ public class QuizManger : MonoBehaviour
     }
     public void SelectedOption(WordData wordData)
     {
-        if (currentAnswerIndex >= answerWordArray.Length) return;
+        if (currentAnswerIndex >= question.answer.Length) return;
         answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
         wordData.gameObject.SetActive(false);
         currentAnswerIndex++;
@@ -85,6 +85,11 @@ public class QuizManger : MonoBehaviour
         {
             answerWordArray[i].gameObject.SetActive(false);
         }  
+    }
+    public void ResetLastWord()
+    {
+        currentAnswerIndex--;
+        answerWordArray[currentAnswerIndex].SetChar('_');
     }
 }
 [System.Serializable]
