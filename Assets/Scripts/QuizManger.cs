@@ -55,7 +55,23 @@ public class QuizManger : MonoBehaviour
         currentAnswerIndex++;
         if(currentAnswerIndex >= question.answer.Length)
         {
-
+            correctAnswer = true;
+            for(int i = 0;i < question.answer.Length; i++)
+            {
+                if(char.ToUpper(question.answer[i]) != char.ToUpper(answerWordArray[i].charValue))
+                {
+                    correctAnswer = false;
+                    break;
+                }
+            }
+            if (correctAnswer)
+            {
+                Debug.Log("correct answer");
+            }
+            else if (!correctAnswer)
+            {
+                Debug.Log("not correct answer");
+            }
         }
     }
     private void ResetQuestion()
