@@ -10,21 +10,34 @@ public class WordData : MonoBehaviour
     [HideInInspector]
     public char charValue;
     private Button buttonObj;
+    public bool isSelected = false;
+
     private void Awake()
     {
         buttonObj = GetComponent<Button>();
-        if (buttonObj)
-        {
-            buttonObj.onClick.AddListener(() => CharSelected());
-        }
     }
+
     public void SetChar(char value)
     {
-        charText.text = value + "";
+        charText.text = value+"";
         charValue = value;
     }
-    private void CharSelected()
+
+    public void SelectChar()
     {
-        QuizManger.instance.SelectedOption(this);
+        if (!isSelected)
+        {
+            // Visual indication of selection, e.g., changing color
+            charText.color = Color.yellow;
+            isSelected = true;
+            QuizManger.instance.SelectedOption(this);
+
+        }
+    }
+
+    public void DeselectChar()
+    {
+        charText.color = Color.black;
+        isSelected = false;
     }
 }
