@@ -67,7 +67,7 @@ public class QuizManger : MonoBehaviour
 
         selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
         answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
-        wordData.gameObject.SetActive(false);
+        
         currentAnswerIndex++;
 
         if (currentAnswerIndex >= answerWord.Length)
@@ -92,7 +92,7 @@ public class QuizManger : MonoBehaviour
 
                 if (currentQuestionIndex < questionData.questions.Count)
                 {
-                    Invoke("SetQuestion", 0.5f);
+                    Invoke("SetQuestion", 1f);
                 }
                 else
                 {
@@ -101,13 +101,14 @@ public class QuizManger : MonoBehaviour
             }
             else
             {
-                Debug.Log("Incorrect answer.");
+                WrongAnswer();
             }
         }
     }
 
     private void ResetQuestion()
     {
+        FindObjectOfType<WordSelectionManager>().ResetSelections();
         for (int i = 0; i < answerWordArray.Length; i++)
         {
             answerWordArray[i].gameObject.SetActive(true);
@@ -122,6 +123,21 @@ public class QuizManger : MonoBehaviour
             optionWordArray[i].gameObject.SetActive(true);
         }
     }
+    public void WrongAnswer()
+    {
+        StartCoroutine(WrongAnswerCoroutine());
+    }
+    private IEnumerator WrongAnswerCoroutine()
+    {
+        Debug.Log("Incorrect answer.");
+        yield return new WaitForSeconds(1f);
+        FindObjectOfType<WordSelectionManager>().ResetSelections();
+        for(int i = 0;i < answerWordArray.Length; i++)
+        {
+            ResetLastWord();
+        }
+        
+    }
 
     public void ResetLastWord()
     {
@@ -132,6 +148,7 @@ public class QuizManger : MonoBehaviour
             selectedWordIndex.RemoveAt(selectedWordIndex.Count - 1);
             currentAnswerIndex--;
             answerWordArray[currentAnswerIndex].SetChar('_');
+            FindObjectOfType<WordSelectionManager>().ResetSelections();
         }
     }
 }
