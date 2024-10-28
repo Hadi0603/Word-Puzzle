@@ -106,7 +106,7 @@ public class QuizManger : MonoBehaviour
         }
     }
 
-    private void ResetQuestion()
+    public void ResetQuestion()
     {
         FindObjectOfType<WordSelectionManager>().ResetSelections();
         for (int i = 0; i < answerWordArray.Length; i++)
@@ -130,7 +130,7 @@ public class QuizManger : MonoBehaviour
     private IEnumerator WrongAnswerCoroutine()
     {
         Debug.Log("Incorrect answer.");
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.3f);
         FindObjectOfType<WordSelectionManager>().ResetSelections();
         for(int i = 0;i < answerWordArray.Length; i++)
         {
