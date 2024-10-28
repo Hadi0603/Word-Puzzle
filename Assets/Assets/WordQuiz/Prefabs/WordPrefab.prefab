@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 494872902519598929}
   m_Layer: 5
   m_Name: WordPrefab
-  m_TagString: Untagged
+  m_TagString: Option
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   charText: {fileID: 6117475963046128396}
   charValue: 0
+  isSelected: 0
 --- !u!114 &6117475963737123554
 MonoBehaviour:
   m_ObjectHideFlags: 0
