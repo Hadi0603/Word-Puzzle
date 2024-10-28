@@ -20,8 +20,7 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.startColor = Color.green;
         lineRenderer.endColor = Color.green;
-        lineRenderer.sortingLayerName = "UI";
-        lineRenderer.sortingOrder = 10;
+        
         lineRenderer.useWorldSpace = true;
 
         graphicRaycaster = FindObjectOfType<GraphicRaycaster>();
@@ -57,19 +56,24 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
 
             foreach (RaycastResult result in results)
             {
-                WordData wordData = result.gameObject.GetComponent<WordData>();
-                if (wordData != null && !wordData.isSelected)
+                // Check if the GameObject has the specific tag before processing
+                if (result.gameObject.CompareTag("Option")) // Replace with your tag
                 {
-                    selectedWords.Add(wordData);
-                    wordData.SelectChar();
+                    WordData wordData = result.gameObject.GetComponent<WordData>();
+                    if (wordData != null && !wordData.isSelected)
+                    {
+                        selectedWords.Add(wordData);
+                        wordData.SelectChar();
 
-                    // Update line renderer
-                    lineRenderer.positionCount = selectedWords.Count;
-                    lineRenderer.SetPosition(selectedWords.Count - 1, wordData.transform.position);
+                        // Update line renderer only for tagged objects
+                        lineRenderer.positionCount = selectedWords.Count;
+                        lineRenderer.SetPosition(selectedWords.Count - 1, wordData.transform.position);
+                    }
                 }
             }
         }
     }
+
     public void ResetSelections()
     {
         foreach (WordData word in selectedWords)
