@@ -54,6 +54,8 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
             List<RaycastResult> results = new List<RaycastResult>();
             graphicRaycaster.Raycast(pointerEventData, results);
 
+            bool foundSelectable = false;
+
             foreach (RaycastResult result in results)
             {
                 // Check if the GameObject has the specific tag before processing
@@ -64,15 +66,23 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
                     {
                         selectedWords.Add(wordData);
                         wordData.SelectChar();
-
-                        // Update line renderer only for tagged objects
-                        lineRenderer.positionCount = selectedWords.Count;
+                        lineRenderer.positionCount = selectedWords.Count + 1; // +1 for the cursor
                         lineRenderer.SetPosition(selectedWords.Count - 1, wordData.transform.position);
+                        foundSelectable = true;
                     }
                 }
             }
+            if (foundSelectable || selectedWords.Count > 0)
+            {
+                lineRenderer.SetPosition(lineRenderer.positionCount - 1, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane)));
+            }
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            QuizManger.instance.WrongAnswer();
         }
     }
+
 
     public void ResetSelections()
     {
