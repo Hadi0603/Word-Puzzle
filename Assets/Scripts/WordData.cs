@@ -30,7 +30,7 @@ public class WordData : MonoBehaviour
             // Visual indication of selection, e.g., changing color
             charText.color = Color.yellow;
             isSelected = true;
-            QuizManger.instance.SelectedOption(this);
+            QuizManager.instance.SelectedOption(this);
 
         }
     }
