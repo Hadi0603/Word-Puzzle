@@ -20,6 +20,7 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.startColor = Color.green;
         lineRenderer.endColor = Color.green;
+        lineRenderer.sortingOrder = 1;
         
         lineRenderer.useWorldSpace = true;
 
@@ -79,7 +80,7 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            QuizManger.instance.WrongAnswer();
+            QuizManager.instance.ResetQuestion();
         }
     }
 
