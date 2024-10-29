@@ -4,13 +4,14 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuizManger : MonoBehaviour
+public class QuizManager : MonoBehaviour
 {
-    public static QuizManger instance;
+    public static QuizManager instance;
     [SerializeField] private GameObject gameOver;
     [SerializeField] private QuizDataScriptable questionData;
     [SerializeField] private WordData[] answerWordArray;
     [SerializeField] private WordData[] optionWordArray;
+    [SerializeField]
     private char[] charArray = new char[6];
     private int currentAnswerIndex = 0;
     private bool correctAnswer = true;
@@ -18,7 +19,10 @@ public class QuizManger : MonoBehaviour
     private int currentQuestionIndex = 0;
     private GameStatus gameStatus = GameStatus.Playing;
     private string answerWord;
+    private string answerWord1;
+    private int number;
     public static int score = 0;
+    private int wordsRemaining = 2;
 
     private void Awake()
     {
@@ -57,54 +61,81 @@ public class QuizManger : MonoBehaviour
             optionWordArray[i].SetChar(charArray[i]);
         }
 
+        
         currentQuestionIndex++;
+        if (wordsRemaining > 1)
+        {
+            answerWord1 = questionData.questions[currentQuestionIndex].answer;
+        }
         gameStatus = GameStatus.Playing;
     }
 
     public void SelectedOption(WordData wordData)
+{
+    if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
+
+    selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
+    answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
+
+    currentAnswerIndex++;
+
+    if (currentAnswerIndex >= answerWord.Length)
     {
-        if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
-
-        selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
-        answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
-        
-        currentAnswerIndex++;
-
-        if (currentAnswerIndex >= answerWord.Length)
+        correctAnswer = true;
+        for (int i = 0; i < answerWord.Length; i++)
         {
-            correctAnswer = true;
-            for (int i = 0; i < answerWord.Length; i++)
+            if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
             {
-                if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
+                // Attempt to match with answerWord1 if answerWord is incorrect
+                if (char.ToUpper(answerWord1[i]) != char.ToUpper(answerWordArray[i].charValue))
                 {
                     correctAnswer = false;
                     break;
                 }
             }
+        }
 
-            if (correctAnswer)
+        if (correctAnswer)
+        {
+            if (answerWord.Equals(answerWord1))
             {
-                gameStatus = GameStatus.Next;
-                score += 50;
-                Debug.Log("Correct answer! Score: " + score);
-                PlayerPrefs.SetInt("Score", score);
-                PlayerPrefs.Save();
-
-                if (currentQuestionIndex < questionData.questions.Count)
-                {
-                    Invoke("SetQuestion", 1f);
-                }
-                else
-                {
-                    gameOver.SetActive(true);
-                }
+                questionData.questions.RemoveAt(currentQuestionIndex);
             }
             else
             {
-                WrongAnswer();
+                questionData.questions.RemoveAt(currentQuestionIndex-1);
+            }
+
+            wordsRemaining--;
+            score += 50;
+            Debug.Log("Correct answer! Score: " + score);
+            PlayerPrefs.SetInt("Score", score);
+            PlayerPrefs.Save();
+
+            gameStatus = GameStatus.Next;
+
+            if (wordsRemaining > 0)
+            {
+                // Update answerWord and answerWord1 with the next available question answers
+                answerWord = questionData.questions[0].answer;
+                if (questionData.questions.Count > 1)
+                {
+                    answerWord1 = questionData.questions[1].answer;
+                }
+                Invoke("SetQuestion", 1f);
+            }
+            else
+            {
+                gameOver.SetActive(true);
             }
         }
+        else
+        {
+            WrongAnswer();
+        }
     }
+}
+
 
     public void ResetQuestion()
     {
@@ -122,6 +153,11 @@ public class QuizManger : MonoBehaviour
         {
             optionWordArray[i].gameObject.SetActive(true);
         }
+
+        for (int i = answerWord.Length; i < optionWordArray.Length; i++)
+        {
+            optionWordArray[i].gameObject.SetActive(false);
+        }
     }
     public void WrongAnswer()
     {
@@ -129,6 +165,7 @@ public class QuizManger : MonoBehaviour
     }
     private IEnumerator WrongAnswerCoroutine()
     {
+        
         Debug.Log("Incorrect answer.");
         yield return new WaitForSeconds(0.3f);
         FindObjectOfType<WordSelectionManager>().ResetSelections();
