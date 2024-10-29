@@ -9,7 +9,7 @@ public class GameManger : MonoBehaviour
     [SerializeField] Text scoreText;
     public void Awake()
     {
-        scoreText.text = "Score: " + QuizManger.score;
+        scoreText.text = "Score: " + QuizManager.score;
     }
     public void PlayBtn()
     {
