@@ -38,56 +38,71 @@ public class QuizManager : MonoBehaviour
     }
 
     private void SetQuestion()
+{
+    currentAnswerIndex = 0;
+    selectedWordIndex.Clear();
+
+    if (questionData.questions.Count <= currentQuestionIndex)
     {
-        currentAnswerIndex = 0;
-        selectedWordIndex.Clear();
-        answerWord = questionData.questions[currentQuestionIndex].answer;
-        ResetQuestion();
-
-        // Populate charArray with the answer characters and random letters
-        for (int i = 0; i < answerWord.Length; i++)
-        {
-            charArray[i] = char.ToUpper(answerWord[i]);
-        }
-        for (int i = answerWord.Length; i < optionWordArray.Length; i++)
-        {
-            charArray[i] = (char)UnityEngine.Random.Range(65, 91);
-        }
-        charArray = ShuffleList.ShuffleListItems<char>(charArray.ToList()).ToArray();
-
-        // Set each optionWordArray element to a character in charArray
-        for (int i = 0; i < optionWordArray.Length; i++)
-        {
-            optionWordArray[i].SetChar(charArray[i]);
-        }
-
-        
-        currentQuestionIndex++;
-        if (wordsRemaining > 1)
-        {
-            answerWord1 = questionData.questions[currentQuestionIndex].answer;
-        }
-        gameStatus = GameStatus.Playing;
+        gameOver.SetActive(true);
+        return;
     }
 
-    public void SelectedOption(WordData wordData)
+    answerWord = questionData.questions[currentQuestionIndex].answer;
+    ResetQuestion();
+
+    // Populate charArray with the answer characters and random letters
+    for (int i = 0; i < answerWord.Length; i++)
+    {
+        charArray[i] = char.ToUpper(answerWord[i]);
+    }
+    for (int i = answerWord.Length; i < optionWordArray.Length; i++)
+    {
+        charArray[i] = (char)UnityEngine.Random.Range(65, 91);
+    }
+    charArray = ShuffleList.ShuffleListItems<char>(charArray.ToList()).ToArray();
+
+    for (int i = 0; i < optionWordArray.Length; i++)
+    {
+        optionWordArray[i].SetChar(charArray[i]);
+    }
+
+    // Update `answerWord1` if a second word exists
+    if (questionData.questions.Count > currentQuestionIndex + 1)
+    {
+        answerWord1 = questionData.questions[currentQuestionIndex + 1].answer;
+    }
+    else
+    {
+        answerWord1 = null;
+    }
+
+    gameStatus = GameStatus.Playing;
+}
+
+public void SelectedOption(WordData wordData)
 {
     if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
 
     selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
     answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
-
     currentAnswerIndex++;
 
     if (currentAnswerIndex >= answerWord.Length)
     {
         correctAnswer = true;
+        bool isPrimaryWordCompleted = true;
+
         for (int i = 0; i < answerWord.Length; i++)
         {
             if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
             {
-                // Attempt to match with answerWord1 if answerWord is incorrect
-                if (char.ToUpper(answerWord1[i]) != char.ToUpper(answerWordArray[i].charValue))
+                // Attempt to match with `answerWord1` if `answerWord` is incorrect
+                if (answerWord1 != null && char.ToUpper(answerWord1[i]) == char.ToUpper(answerWordArray[i].charValue))
+                {
+                    isPrimaryWordCompleted = false;
+                }
+                else
                 {
                     correctAnswer = false;
                     break;
@@ -97,13 +112,15 @@ public class QuizManager : MonoBehaviour
 
         if (correctAnswer)
         {
-            if (answerWord.Equals(answerWord1))
+            if (isPrimaryWordCompleted && answerWord != null)
             {
                 questionData.questions.RemoveAt(currentQuestionIndex);
+                answerWord = null;
             }
-            else
+            else if (!isPrimaryWordCompleted && answerWord1 != null)
             {
-                questionData.questions.RemoveAt(currentQuestionIndex-1);
+                questionData.questions.RemoveAt(currentQuestionIndex + 1);
+                answerWord1 = null;
             }
 
             wordsRemaining--;
@@ -116,25 +133,28 @@ public class QuizManager : MonoBehaviour
 
             if (wordsRemaining > 0)
             {
-                // Update answerWord and answerWord1 with the next available question answers
-                answerWord = questionData.questions[0].answer;
-                if (questionData.questions.Count > 1)
-                {
-                    answerWord1 = questionData.questions[1].answer;
-                }
-                Invoke("SetQuestion", 1f);
+                Invoke("SetQuestion", 0.3f);
             }
             else
             {
                 gameOver.SetActive(true);
+                PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
+                PlayerPrefs.Save();
             }
         }
         else
         {
             WrongAnswer();
         }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            WrongAnswer();
+        }
     }
 }
+
+
 
 
     public void ResetQuestion()
