@@ -133,7 +133,7 @@ public void SelectedOption(WordData wordData)
 
             if (wordsRemaining > 0)
             {
-                Invoke("SetQuestion", 0.3f);
+                Invoke("SetQuestion", 0.2f);
             }
             else
             {
@@ -143,11 +143,6 @@ public void SelectedOption(WordData wordData)
             }
         }
         else
-        {
-            WrongAnswer();
-        }
-
-        if (Input.GetMouseButtonUp(0))
         {
             WrongAnswer();
         }
@@ -172,11 +167,6 @@ public void SelectedOption(WordData wordData)
         for (int i = 0; i < optionWordArray.Length; i++)
         {
             optionWordArray[i].gameObject.SetActive(true);
-        }
-
-        for (int i = answerWord.Length; i < optionWordArray.Length; i++)
-        {
-            optionWordArray[i].gameObject.SetActive(false);
         }
     }
     public void WrongAnswer()
