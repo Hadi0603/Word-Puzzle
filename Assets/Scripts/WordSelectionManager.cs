@@ -59,8 +59,7 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
 
             foreach (RaycastResult result in results)
             {
-                // Check if the GameObject has the specific tag before processing
-                if (result.gameObject.CompareTag("Option")) // Replace with your tag
+                if (result.gameObject.CompareTag("Option"))
                 {
                     WordData wordData = result.gameObject.GetComponent<WordData>();
                     if (wordData != null && !wordData.isSelected)
@@ -80,7 +79,13 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         }
         else if (Input.GetMouseButtonUp(0))
         {
+            Debug.Log("hi");
             QuizManager.instance.ResetQuestion();
+            for (int i = 0; i <10; i++)
+            {
+                QuizManager.instance.ResetLastWord();
+            }
+            
         }
     }
 
