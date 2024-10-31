@@ -11,6 +11,7 @@ public class QuizManager : MonoBehaviour
     [SerializeField] private QuizDataScriptable questionData;
     [SerializeField] private WordData[] answerWordArray;
     [SerializeField] private WordData[] optionWordArray;
+    [SerializeField] private Text completedWordText; 
     [SerializeField]
     private char[] charArray = new char[6];
     private int currentAnswerIndex = 0;
@@ -35,122 +36,127 @@ public class QuizManager : MonoBehaviour
     private void Start()
     {
         SetQuestion();
+        completedWordText.gameObject.SetActive(false);
     }
 
     private void SetQuestion()
-{
-    currentAnswerIndex = 0;
-    selectedWordIndex.Clear();
-
-    if (questionData.questions.Count <= currentQuestionIndex)
     {
-        gameOver.SetActive(true);
-        return;
-    }
+        currentAnswerIndex = 0;
+        selectedWordIndex.Clear();
 
-    answerWord = questionData.questions[currentQuestionIndex].answer;
-    ResetQuestion();
-
-    // Populate charArray with the answer characters and random letters
-    for (int i = 0; i < answerWord.Length; i++)
-    {
-        charArray[i] = char.ToUpper(answerWord[i]);
-    }
-    for (int i = answerWord.Length; i < optionWordArray.Length; i++)
-    {
-        charArray[i] = (char)UnityEngine.Random.Range(65, 91);
-    }
-    charArray = ShuffleList.ShuffleListItems<char>(charArray.ToList()).ToArray();
-
-    for (int i = 0; i < optionWordArray.Length; i++)
-    {
-        optionWordArray[i].SetChar(charArray[i]);
-    }
-
-    // Update `answerWord1` if a second word exists
-    if (questionData.questions.Count > currentQuestionIndex + 1)
-    {
-        answerWord1 = questionData.questions[currentQuestionIndex + 1].answer;
-    }
-    else
-    {
-        answerWord1 = null;
-    }
-
-    gameStatus = GameStatus.Playing;
-}
-
-public void SelectedOption(WordData wordData)
-{
-    if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
-
-    selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
-    answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
-    currentAnswerIndex++;
-
-    if (currentAnswerIndex >= answerWord.Length)
-    {
-        correctAnswer = true;
-        bool isPrimaryWordCompleted = true;
-
-        for (int i = 0; i < answerWord.Length; i++)
+        if (questionData.questions.Count <= currentQuestionIndex)
         {
-            if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
-            {
-                // Attempt to match with `answerWord1` if `answerWord` is incorrect
-                if (answerWord1 != null && char.ToUpper(answerWord1[i]) == char.ToUpper(answerWordArray[i].charValue))
-                {
-                    isPrimaryWordCompleted = false;
-                }
-                else
-                {
-                    correctAnswer = false;
-                    break;
-                }
-            }
+            gameOver.SetActive(true);
+            return;
         }
 
-        if (correctAnswer)
+        answerWord = questionData.questions[currentQuestionIndex].answer;
+        ResetQuestion();
+
+        // Populate charArray with the answer characters and random letters
+        for (int i = 0; i < answerWord.Length; i++)
         {
-            if (isPrimaryWordCompleted && answerWord != null)
-            {
-                questionData.questions.RemoveAt(currentQuestionIndex);
-                answerWord = null;
-            }
-            else if (!isPrimaryWordCompleted && answerWord1 != null)
-            {
-                questionData.questions.RemoveAt(currentQuestionIndex + 1);
-                answerWord1 = null;
-            }
+            charArray[i] = char.ToUpper(answerWord[i]);
+        }
+        for (int i = answerWord.Length; i < optionWordArray.Length; i++)
+        {
+            charArray[i] = (char)UnityEngine.Random.Range(65, 91);
+        }
+        charArray = ShuffleList.ShuffleListItems<char>(charArray.ToList()).ToArray();
 
-            wordsRemaining--;
-            score += 50;
-            Debug.Log("Correct answer! Score: " + score);
-            PlayerPrefs.SetInt("Score", score);
-            PlayerPrefs.Save();
-
-            gameStatus = GameStatus.Next;
-
-            if (wordsRemaining > 0)
-            {
-                Invoke("SetQuestion", 0.2f);
-            }
-            else
-            {
-                gameOver.SetActive(true);
-                PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
-                PlayerPrefs.Save();
-            }
+        for (int i = 0; i < optionWordArray.Length; i++)
+        {
+            optionWordArray[i].SetChar(charArray[i]);
+        }
+        if (questionData.questions.Count > currentQuestionIndex + 1)
+        {
+            answerWord1 = questionData.questions[currentQuestionIndex + 1].answer;
         }
         else
         {
-            WrongAnswer();
+            answerWord1 = null;
+        }
+
+        gameStatus = GameStatus.Playing;
+    }
+
+    public void SelectedOption(WordData wordData)
+    {
+        if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
+
+        selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
+        answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
+        currentAnswerIndex++;
+
+        if (currentAnswerIndex >= answerWord.Length)
+        {
+            correctAnswer = true;
+            bool isPrimaryWordCompleted = true;
+
+            for (int i = 0; i < answerWord.Length; i++)
+            {
+                if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
+                {
+                    if (answerWord1 != null && char.ToUpper(answerWord1[i]) == char.ToUpper(answerWordArray[i].charValue))
+                    {
+                        isPrimaryWordCompleted = false;
+                    }
+                    else
+                    {
+                        correctAnswer = false;
+                        break;
+                    }
+                }
+            }
+
+            if (correctAnswer)
+            {
+                if (isPrimaryWordCompleted && answerWord != null)
+                {
+                    questionData.questions.RemoveAt(currentQuestionIndex);
+                    StartCoroutine(ShowCompletedWord(answerWord));
+                    answerWord = null;
+                }
+                else if (!isPrimaryWordCompleted && answerWord1 != null)
+                {
+                    questionData.questions.RemoveAt(currentQuestionIndex + 1);
+                    StartCoroutine(ShowCompletedWord(answerWord1));
+                    answerWord1 = null;
+                }
+
+                wordsRemaining--;
+                score += 50;
+                Debug.Log("Correct answer! Score: " + score);
+                PlayerPrefs.SetInt("Score", score);
+                PlayerPrefs.Save();
+
+                gameStatus = GameStatus.Next;
+
+                if (wordsRemaining > 0)
+                {
+                    Invoke("SetQuestion", 0.2f);
+                }
+                else
+                {
+                    gameOver.SetActive(true);
+                    PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
+                    PlayerPrefs.Save();
+                }
+            }
+            else
+            {
+                WrongAnswer();
+            }
         }
     }
-}
 
-
-
+    private IEnumerator ShowCompletedWord(string word)
+    {
+        completedWordText.text = word;
+        completedWordText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        completedWordText.gameObject.SetActive(false);
+    }
 
     public void ResetQuestion()
     {
@@ -169,13 +175,14 @@ public void SelectedOption(WordData wordData)
             optionWordArray[i].gameObject.SetActive(true);
         }
     }
+
     public void WrongAnswer()
     {
         StartCoroutine(WrongAnswerCoroutine());
     }
+
     private IEnumerator WrongAnswerCoroutine()
     {
-        
         Debug.Log("Incorrect answer.");
         yield return new WaitForSeconds(0.3f);
         FindObjectOfType<WordSelectionManager>().ResetSelections();
@@ -183,7 +190,6 @@ public void SelectedOption(WordData wordData)
         {
             ResetLastWord();
         }
-        
     }
 
     public void ResetLastWord()
