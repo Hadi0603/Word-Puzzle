@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class GameManger : MonoBehaviour
 {
     [SerializeField] Text scoreText;
+    [SerializeField] private GameObject pauseUI;
     public static int levelToLoad;
     private void Awake()
     {
@@ -29,8 +30,16 @@ public class GameManger : MonoBehaviour
     {
         SceneManager.LoadScene("Menu");
     }
-    public void Restart()
+
+    public void Pause()
     {
-        SceneManager.LoadScene(sceneBuildIndex: SceneManager.GetActiveScene().buildIndex);
+        Time.timeScale = 0f;
+        pauseUI.SetActive(true);
+    }
+
+    public void Resume()
+    {
+        pauseUI.SetActive(false);
+        Time.timeScale = 1f;
     }
 }
