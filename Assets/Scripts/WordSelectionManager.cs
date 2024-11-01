@@ -18,8 +18,8 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         lineRenderer.startWidth = 0.1f;
         lineRenderer.endWidth = 0.1f;
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.startColor = Color.green;
-        lineRenderer.endColor = Color.green;
+        lineRenderer.startColor = Color.black;
+        lineRenderer.endColor = Color.black;
         lineRenderer.sortingOrder = 1;
         
         lineRenderer.useWorldSpace = true;
