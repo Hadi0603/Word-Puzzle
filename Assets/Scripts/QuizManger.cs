@@ -2,16 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class QuizManager : MonoBehaviour
 {
     public static QuizManager instance;
-    [SerializeField] private GameObject gameOver;
+    [FormerlySerializedAs("gameOver")] [SerializeField] private GameObject levelComplete;
+    [SerializeField] private GameObject levelLostUI;      // UI to show when time runs out
+    [SerializeField] private Text timerText;              // UI text for the countdown timer
+    [SerializeField] private int levelTime = 60; 
     [SerializeField] private QuizDataScriptable questionData;
     [SerializeField] private WordData[] answerWordArray;
     [SerializeField] private WordData[] optionWordArray;
-    [SerializeField] private Text completedWordText; 
+    [SerializeField] private Text completedWordText;
+    [SerializeField] private Text completedWordText1;
+    [SerializeField] private Text wrongWordText;
     [SerializeField]
     private char[] charArray = new char[6];
     private int currentAnswerIndex = 0;
@@ -24,6 +30,9 @@ public class QuizManager : MonoBehaviour
     private int number;
     public static int score = 0;
     private int wordsRemaining = 2;
+    private bool firstWordCompleted = false;
+    private int timeRemaining;
+    private bool isLevelLost = false;
 
     private void Awake()
     {
@@ -35,10 +44,52 @@ public class QuizManager : MonoBehaviour
 
     private void Start()
     {
+        timeRemaining = levelTime;
+        UpdateTimerUI();
+        StartCoroutine(LevelTimer());
+
+        levelComplete.SetActive(false);
+        wrongWordText.gameObject.SetActive(false);
         SetQuestion();
         completedWordText.gameObject.SetActive(false);
+        FindObjectOfType<WordSelectionManager>().enabled = true;
+    }
+    private IEnumerator LevelTimer()
+    {
+        while (timeRemaining > 0 && !isLevelLost)
+        {
+            yield return new WaitForSeconds(1f);
+            timeRemaining--;
+            UpdateTimerUI();
+
+            if (timeRemaining <= 0)
+            {
+                ShowLevelLost();
+            }
+        }
+    }
+    private void UpdateTimerUI()
+    {
+        timerText.text = $"00:{timeRemaining:D2}";
+        timerText.color = timeRemaining <= 10 ? Color.red : Color.black;
+    }
+    private void ShowLevelLost()
+    {
+        WrongAnswer();
+        isLevelLost = true;
+        levelLostUI.SetActive(true);
+        FindObjectOfType<WordSelectionManager>().enabled = false;
     }
 
+    public void Restart()
+    {
+        FindObjectOfType<WordSelectionManager>().enabled = true;
+        isLevelLost = false;
+        levelLostUI.SetActive(false);
+        timeRemaining = 15;
+        UpdateTimerUI();
+        StartCoroutine(LevelTimer());
+    }
     private void SetQuestion()
     {
         currentAnswerIndex = 0;
@@ -46,7 +97,7 @@ public class QuizManager : MonoBehaviour
 
         if (questionData.questions.Count <= currentQuestionIndex)
         {
-            gameOver.SetActive(true);
+            levelComplete.SetActive(true);
             return;
         }
 
@@ -138,7 +189,9 @@ public class QuizManager : MonoBehaviour
                 }
                 else
                 {
-                    gameOver.SetActive(true);
+                    levelComplete.SetActive(true);
+                    ResetQuestion();
+                    FindObjectOfType<WordSelectionManager>().enabled = false;
                     PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
                     PlayerPrefs.Save();
                 }
@@ -152,10 +205,20 @@ public class QuizManager : MonoBehaviour
 
     private IEnumerator ShowCompletedWord(string word)
     {
-        completedWordText.text = word;
-        completedWordText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        completedWordText.gameObject.SetActive(false);
+        if (!firstWordCompleted)
+        {
+            completedWordText.text = word;
+            completedWordText.gameObject.SetActive(true);
+            firstWordCompleted = true;  // Mark the first word as completed
+        }
+        else
+        {
+            completedWordText1.text = word;
+            completedWordText1.gameObject.SetActive(true);
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
     }
 
     public void ResetQuestion()
@@ -184,12 +247,15 @@ public class QuizManager : MonoBehaviour
     private IEnumerator WrongAnswerCoroutine()
     {
         Debug.Log("Incorrect answer.");
+        wrongWordText.gameObject.SetActive(true);
         yield return new WaitForSeconds(0.3f);
         FindObjectOfType<WordSelectionManager>().ResetSelections();
         for(int i = 0;i < answerWordArray.Length; i++)
         {
             ResetLastWord();
         }
+        yield return new WaitForSeconds(1f);
+        wrongWordText.gameObject.SetActive(false);
     }
 
     public void ResetLastWord()
