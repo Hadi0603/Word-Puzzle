@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: QuestionData
   m_EditorClassIdentifier: 
   questions:
-  - answer: MOTHER
-  - answer: FRIEND
+  - answer: LISTEN
+  - answer: SILENT
