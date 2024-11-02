@@ -42,6 +42,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: LineLayer
+    uniqueID: 1919139951
+    locked: 0
   - name: UI
     uniqueID: 2218125203
     locked: 0
