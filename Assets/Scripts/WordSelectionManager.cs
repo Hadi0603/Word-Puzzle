@@ -21,7 +21,7 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
         lineRenderer.startColor = Color.black;
         lineRenderer.endColor = Color.black;
         lineRenderer.sortingOrder = 1;
-        
+        lineRenderer.sortingLayerName = "UI";
         lineRenderer.useWorldSpace = true;
 
         graphicRaycaster = FindObjectOfType<GraphicRaycaster>();
