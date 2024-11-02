@@ -15,12 +15,12 @@ public class WordSelectionManager : MonoBehaviour, IPointerDownHandler, IPointer
     {
         lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.positionCount = 0;
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
+        lineRenderer.startWidth = 0.15f;
+        lineRenderer.endWidth = 0.15f;
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.startColor = Color.black;
-        lineRenderer.endColor = Color.black;
-        lineRenderer.sortingOrder = 1;
+        lineRenderer.startColor = Color.blue;
+        lineRenderer.endColor = Color.blue;
+        lineRenderer.sortingOrder = 2;
         lineRenderer.sortingLayerName = "UI";
         lineRenderer.useWorldSpace = true;
 
