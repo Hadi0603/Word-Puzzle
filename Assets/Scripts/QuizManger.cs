@@ -33,6 +33,7 @@ public class QuizManager : MonoBehaviour
     private bool firstWordCompleted = false;
     private int timeRemaining;
     private bool isLevelLost = false;
+    private int levelCompleted = 0;
 
     private void Awake()
     {
@@ -56,7 +57,8 @@ public class QuizManager : MonoBehaviour
     }
     private IEnumerator LevelTimer()
     {
-        while (timeRemaining > 0 && !isLevelLost)
+        
+        while (timeRemaining > 0 && !isLevelLost&&levelCompleted==0)
         {
             yield return new WaitForSeconds(1f);
             timeRemaining--;
@@ -190,7 +192,8 @@ public class QuizManager : MonoBehaviour
                 else
                 {
                     levelComplete.SetActive(true);
-                    ResetQuestion();
+                    levelCompleted = 1;
+                    FindObjectOfType<WordSelectionManager>().ResetSelections();
                     FindObjectOfType<WordSelectionManager>().enabled = false;
                     PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
                     PlayerPrefs.Save();
