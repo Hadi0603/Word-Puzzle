@@ -28,18 +28,19 @@ public class GameManger : MonoBehaviour
     }
     public void Back()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene("Menu");
     }
 
     public void Pause()
     {
-        Time.timeScale = 0f;
         pauseUI.SetActive(true);
+        Time.timeScale = 0f;
     }
 
     public void Resume()
     {
-        pauseUI.SetActive(false);
         Time.timeScale = 1f;
+        pauseUI.SetActive(false);
     }
 }
