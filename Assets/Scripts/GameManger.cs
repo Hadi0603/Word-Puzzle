@@ -29,18 +29,21 @@ public class GameManger : MonoBehaviour
     public void Back()
     {
         Time.timeScale = 1f;
+        FindObjectOfType<WordSelectionManager>().enabled = true;
         SceneManager.LoadScene("Menu");
     }
 
     public void Pause()
     {
         pauseUI.SetActive(true);
+        FindObjectOfType<WordSelectionManager>().enabled = false;
         Time.timeScale = 0f;
     }
 
     public void Resume()
     {
         Time.timeScale = 1f;
+        FindObjectOfType<WordSelectionManager>().enabled = true;
         pauseUI.SetActive(false);
     }
 }
