@@ -140,6 +140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   charText: {fileID: 3662436902458634687}
   charValue: 0
+  isSelected: 0
 --- !u!114 &3662436903015444561
 MonoBehaviour:
   m_ObjectHideFlags: 0
