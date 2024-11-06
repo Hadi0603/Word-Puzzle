@@ -34,6 +34,8 @@ public class QuizManager : MonoBehaviour
     private int timeRemaining;
     private bool isLevelLost = false;
     private int levelCompleted = 0;
+    private bool isAnswerWordCompleted = false;
+    private bool isAnswerWord1Completed = false;
 
     private void Awake()
     {
@@ -82,16 +84,6 @@ public class QuizManager : MonoBehaviour
         levelLostUI.SetActive(true);
         FindObjectOfType<WordSelectionManager>().enabled = false;
     }
-
-    public void Restart()
-    {
-        FindObjectOfType<WordSelectionManager>().enabled = true;
-        isLevelLost = false;
-        levelLostUI.SetActive(false);
-        timeRemaining = 15;
-        UpdateTimerUI();
-        StartCoroutine(LevelTimer());
-    }
     private void SetQuestion()
     {
         currentAnswerIndex = 0;
@@ -131,80 +123,79 @@ public class QuizManager : MonoBehaviour
         }
 
         gameStatus = GameStatus.Playing;
-    }
+    } 
 
-    public void SelectedOption(WordData wordData)
+public void SelectedOption(WordData wordData)
+{
+    if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
+
+    selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
+    answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
+    currentAnswerIndex++;
+
+    if (currentAnswerIndex >= answerWord.Length)
     {
-        if (gameStatus == GameStatus.Next || currentAnswerIndex >= answerWord.Length) return;
+        correctAnswer = true;
+        bool isPrimaryWordCompleted = true;
 
-        selectedWordIndex.Add(wordData.transform.GetSiblingIndex());
-        answerWordArray[currentAnswerIndex].SetChar(wordData.charValue);
-        currentAnswerIndex++;
-
-        if (currentAnswerIndex >= answerWord.Length)
+        for (int i = 0; i < answerWord.Length; i++)
         {
-            correctAnswer = true;
-            bool isPrimaryWordCompleted = true;
-
-            for (int i = 0; i < answerWord.Length; i++)
+            if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
             {
-                if (char.ToUpper(answerWord[i]) != char.ToUpper(answerWordArray[i].charValue))
+                if (answerWord1 != null && char.ToUpper(answerWord1[i]) == char.ToUpper(answerWordArray[i].charValue))
                 {
-                    if (answerWord1 != null && char.ToUpper(answerWord1[i]) == char.ToUpper(answerWordArray[i].charValue))
-                    {
-                        isPrimaryWordCompleted = false;
-                    }
-                    else
-                    {
-                        correctAnswer = false;
-                        break;
-                    }
-                }
-            }
-
-            if (correctAnswer)
-            {
-                if (isPrimaryWordCompleted && answerWord != null)
-                {
-                    questionData.questions.RemoveAt(currentQuestionIndex);
-                    StartCoroutine(ShowCompletedWord(answerWord));
-                    answerWord = null;
-                }
-                else if (!isPrimaryWordCompleted && answerWord1 != null)
-                {
-                    questionData.questions.RemoveAt(currentQuestionIndex + 1);
-                    StartCoroutine(ShowCompletedWord(answerWord1));
-                    answerWord1 = null;
-                }
-
-                wordsRemaining--;
-                score += 50;
-                Debug.Log("Correct answer! Score: " + score);
-                PlayerPrefs.SetInt("Score", score);
-                PlayerPrefs.Save();
-
-                gameStatus = GameStatus.Next;
-
-                if (wordsRemaining > 0)
-                {
-                    Invoke("SetQuestion", 0.2f);
+                    isPrimaryWordCompleted = false;
                 }
                 else
                 {
-                    levelComplete.SetActive(true);
-                    levelCompleted = 1;
-                    FindObjectOfType<WordSelectionManager>().ResetSelections();
-                    FindObjectOfType<WordSelectionManager>().enabled = false;
-                    PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
-                    PlayerPrefs.Save();
+                    correctAnswer = false;
+                    break;
                 }
+            }
+        }
+
+        if (correctAnswer)
+        {
+            if (isPrimaryWordCompleted && !isAnswerWordCompleted)
+            {
+                isAnswerWordCompleted = true; // Mark first word as completed
+                StartCoroutine(ShowCompletedWord(answerWord));
+            }
+            else if (!isPrimaryWordCompleted && !isAnswerWord1Completed)
+            {
+                isAnswerWord1Completed = true; // Mark second word as completed
+                StartCoroutine(ShowCompletedWord(answerWord1));
+            }
+
+            wordsRemaining--;
+            score += 50;
+            PlayerPrefs.SetInt("Score", score);
+            PlayerPrefs.Save();
+
+            gameStatus = GameStatus.Next;
+
+            // Check if both words are completed
+            if (isAnswerWordCompleted && isAnswerWord1Completed)
+            {
+                levelComplete.SetActive(true);
+                levelCompleted = 1;
+                FindObjectOfType<WordSelectionManager>().ResetSelections();
+                FindObjectOfType<WordSelectionManager>().enabled = false;
+                PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
+                PlayerPrefs.Save();
             }
             else
             {
-                WrongAnswer();
+                Invoke("SetQuestion", 0.2f);
             }
         }
+        else
+        {
+            WrongAnswer();
+        }
     }
+}
+
 
     private IEnumerator ShowCompletedWord(string word)
     {
