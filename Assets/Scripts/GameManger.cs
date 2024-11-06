@@ -46,4 +46,9 @@ public class GameManger : MonoBehaviour
         FindObjectOfType<WordSelectionManager>().enabled = true;
         pauseUI.SetActive(false);
     }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 }
