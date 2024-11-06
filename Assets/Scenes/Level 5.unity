@@ -3605,8 +3605,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1728112002}
-        m_TargetAssemblyTypeName: QuizManager, Assembly-CSharp
+      - m_Target: {fileID: 1381085748}
+        m_TargetAssemblyTypeName: GameManger, Assembly-CSharp
         m_MethodName: Restart
         m_Mode: 1
         m_Arguments:
