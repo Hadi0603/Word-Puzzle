@@ -339,7 +339,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: WORD PUZZLE
+  m_Text: Word Pair Hunt
 --- !u!222 &488137917
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -782,9 +782,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreText: {fileID: 280324633}
-  LevelLost: {fileID: 0}
-  overTime: 0
-  overTimeText: {fileID: 0}
+  pauseUI: {fileID: 0}
 --- !u!4 &1871680818
 Transform:
   m_ObjectHideFlags: 0
