@@ -3088,6 +3088,7 @@ MonoBehaviour:
   completedWordText1: {fileID: 409652392}
   wrongWordText: {fileID: 1567588213}
   charArray: 0000000000000000
+  pauseBtn: {fileID: 1842034139}
 --- !u!1 &1768915052
 GameObject:
   m_ObjectHideFlags: 0
