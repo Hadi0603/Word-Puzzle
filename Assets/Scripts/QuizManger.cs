@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class QuizManager : MonoBehaviour
 {
     public static QuizManager instance;
-    [FormerlySerializedAs("gameOver")] [SerializeField] private GameObject levelComplete;
+    [FormerlySerializedAs("gameOver")] [SerializeField] public GameObject levelComplete;
     [SerializeField] private GameObject levelLostUI;      // UI to show when time runs out
     [SerializeField] private Text timerText;              // UI text for the countdown timer
     [SerializeField] private int levelTime = 60; 
@@ -20,6 +20,8 @@ public class QuizManager : MonoBehaviour
     [SerializeField] private Text wrongWordText;
     [SerializeField]
     private char[] charArray = new char[6];
+
+    [SerializeField] private GameObject pauseBtn;
     private int currentAnswerIndex = 0;
     private bool correctAnswer = true;
     private List<int> selectedWordIndex;
@@ -50,11 +52,12 @@ public class QuizManager : MonoBehaviour
         timeRemaining = levelTime;
         UpdateTimerUI();
         StartCoroutine(LevelTimer());
-
         levelComplete.SetActive(false);
+        pauseBtn.SetActive(true);
         wrongWordText.gameObject.SetActive(false);
         SetQuestion();
         completedWordText.gameObject.SetActive(false);
+        
         FindObjectOfType<WordSelectionManager>().enabled = true;
     }
     private IEnumerator LevelTimer()
@@ -80,6 +83,7 @@ public class QuizManager : MonoBehaviour
     private void ShowLevelLost()
     {
         WrongAnswer();
+        pauseBtn.SetActive(false);
         isLevelLost = true;
         levelLostUI.SetActive(true);
         FindObjectOfType<WordSelectionManager>().enabled = false;
@@ -181,6 +185,7 @@ public void SelectedOption(WordData wordData)
                 levelCompleted = 1;
                 FindObjectOfType<WordSelectionManager>().ResetSelections();
                 FindObjectOfType<WordSelectionManager>().enabled = false;
+                pauseBtn.SetActive(false);
                 PlayerPrefs.SetInt("levelToLoad", ++GameManger.levelToLoad);
                 PlayerPrefs.Save();
             }
