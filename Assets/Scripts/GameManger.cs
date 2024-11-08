@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class GameManger : MonoBehaviour
 {
     [SerializeField] Text scoreText;
-    [SerializeField] private GameObject pauseUI;
+    [SerializeField] public GameObject pauseUI;
     public static int levelToLoad;
     private void Awake()
     {
